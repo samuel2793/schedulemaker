@@ -77,7 +77,7 @@
     </table>
 
     <div id="warningMessage" class="warning" style="display: none;">
-        ¡Advertencia! Se han detectado solapamientos en el horario.
+        <!-- Mensajes de error de solapamiento se mostrarán aquí -->
     </div>
 
     <div class="group-list" id="groupList">
@@ -165,7 +165,7 @@
             const allCombinations = generateCombinations(enabledSubjects);
             let bestCombination = null;
             let bestScore = Infinity;
-            let hasConflicts = false;
+            let conflicts = [];
 
             const penalizeAfternoon = document.getElementById('penalizeAfternoon').checked;
             const penalizeFriday = document.getElementById('penalizeFriday').checked;
@@ -182,13 +182,14 @@
             });
 
             if (bestCombination) {
-                hasConflicts = displaySchedule(bestCombination);
+                conflicts = displaySchedule(bestCombination);
             } else {
                 alert("No se pudo generar un horario válido.");
             }
 
-            if (hasConflicts) {
+            if (conflicts.length > 0) {
                 document.getElementById('warningMessage').style.display = 'block';
+                document.getElementById('warningMessage').innerHTML = generateConflictMessage(conflicts);
             } else {
                 document.getElementById('warningMessage').style.display = 'none';
             }
@@ -285,7 +286,7 @@
         function displaySchedule(bestCombination) {
             const tableBody = document.getElementById('tableBody');
             tableBody.innerHTML = ''; // Limpiar tabla
-            let hasConflicts = false;
+            let conflicts = [];
 
             const hours = [
                 '08:00-09:00', '09:00-10:00', '10:00-11:00', '11:00-12:00', 
@@ -313,8 +314,13 @@
                     const row = tableBody.children[i];
                     const cell = row.children[dayIndex];
                     if (cell.innerHTML) {
+                        conflicts.push({
+                            day,
+                            hour: hours[i],
+                            subject1: cell.innerHTML,
+                            subject2: `${subject} (${group})`
+                        });
                         cell.classList.add('conflict');
-                        hasConflicts = true;
                     } else {
                         cell.innerHTML = `${subject} (${group})`;
                         cell.style.backgroundColor = color;
@@ -323,7 +329,15 @@
                 }
             });
 
-            return hasConflicts;
+            return conflicts;
+        }
+
+        function generateConflictMessage(conflicts) {
+            let message = "¡Advertencia! Se han detectado los siguientes solapamientos en el horario:<br>";
+            conflicts.forEach(conflict => {
+                message += `Día: ${conflict.day}, Hora: ${conflict.hour} - ${conflict.subject1} y ${conflict.subject2}<br>`;
+            });
+            return message;
         }
     </script>
 </body>
