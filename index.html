@@ -47,6 +47,8 @@
         <label for="penalizeFriday">Penalizar grupos de los viernes</label><br>
         <input type="checkbox" id="penalizeGaps" value="true">
         <label for="penalizeGaps">Penalizar huecos entre grupos</label><br>
+        <input type="checkbox" id="penalizeBefore10" value="true">
+        <label for="penalizeBefore10">Penalizar clases antes de las 10:00 AM</label><br>
         <button onclick="generateBestSchedule()">Generar Mejor Horario</button>
     </div>
     <h2>Horario</h2>
@@ -155,9 +157,10 @@
             const penalizeAfternoon = document.getElementById('penalizeAfternoon').checked;
             const penalizeFriday = document.getElementById('penalizeFriday').checked;
             const penalizeGaps = document.getElementById('penalizeGaps').checked;
+            const penalizeBefore10 = document.getElementById('penalizeBefore10').checked;
 
             allCombinations.forEach(combination => {
-                const score = evaluateSchedule(combination, penalizeAfternoon, penalizeFriday, penalizeGaps);
+                const score = evaluateSchedule(combination, penalizeAfternoon, penalizeFriday, penalizeGaps, penalizeBefore10);
                 if (score < bestScore) {
                     bestScore = score;
                     bestCombination = combination;
@@ -186,7 +189,7 @@
             return combinations;
         }
 
-        function evaluateSchedule(schedule, penalizeAfternoon, penalizeFriday, penalizeGaps) {
+        function evaluateSchedule(schedule, penalizeAfternoon, penalizeFriday, penalizeGaps, penalizeBefore10) {
             const timeSlots = {};
             let score = 0;
             const daySchedules = {
@@ -220,6 +223,14 @@
                 // Penalizar grupos de los viernes
                 if (penalizeFriday && day === 'Viernes') {
                     score += 50;
+                }
+
+                // Penalizar clases antes de las 10:00 AM
+                if (penalizeBefore10) {
+                    const startHour = parseInt(startTime.split(':')[0]);
+                    if (startHour < 10) {
+                        score += 50;
+                    }
                 }
 
                 // Añadir el horario a la lista del día correspondiente
