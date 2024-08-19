@@ -1,5 +1,28 @@
-Matemáticas;Grupo 1;Lunes 08:00-10:00;#FF5733
-Matemáticas;Grupo 2;Martes 10:00-12:00;#FF5733
-Física;Grupo 1;Miércoles 11:00-13:00;#33FF57
-Física;Grupo 2;Jueves 14:00-16:00;#33FF57
-Química;Grupo 1;Viernes 09:00-11:00;#3357FF
+GCS TEO;Grupo 1;Martes 15:00-17:00;#2225CB
+GCS PPR;Grupo 1;Martes 17:00-18:00;#2225CB
+GCS PPR;Grupo 2;Martes 19:00-20:00;#2225CB
+GCS POR;Grupo 1;Martes 18:00-19:00;#2225CB
+GCS POR;Grupo 2;Martes 20:00-21:00;#2225CB
+MTIS TEO;Grupo 1;Miércoles 09:00-11:00;#7B52A9
+MTIS POR;Grupo 1;Miércoles 15:00-17:00;#7B52A9
+MTIS POR;Grupo 2;Miércoles 19:00-21:00;#7B52A9
+PPSS POR;Grupo 2;Lunes 09:00-11:00;#078519
+PPSS POR;Grupo 4 ARA;Lunes 11:00-13:00;#078519
+PPSS TEO;Grupo 2 ARA;Lunes 13:00-15:00;#078519
+PPSS POR;Grupo 3;Martes 09:00-11:00;#078519
+PPSS POR;Grupo 40;Martes 11:00-13:00;#078519
+PPSS POR;Grupo 9;Martes 13:00-15:00;#078519
+PPSS POR;Grupo 5;Martes 17:00-19:00;#078519
+PPSS POR;Grupo 6;Martes 19:00-21:00;#078519
+PPSS POR;Grupo 1;Miércoles 09:00-11:00;#078519
+PPSS TEO;Grupo 40;Miércoles 09:00-11:00;#078519
+PPSS TEO;Grupo 1;Miércoles 11:00-13:00;#078519
+PPSS TEO;Grupo 3;Miércoles 15:00-17:00;#078519
+PPSS POR;Grupo 8;Miércoles 17:00-19:00;#078519
+PPSS POR;Grupo 7;Miércoles 19:00-21:00;#078519
+SDS TEO;Grupo 1;Martes 09:00-11:00;#CA001A
+SDS POR;Grupo 1;Martes 11:00-13:00;#CA001A
+SDS POR;Grupo 2;Martes 13:00-15:00;#CA001A
+TADS TEO;Grupo 1;Miércoles 15:00-17:00;#214914
+TADS POR;Grupo 1;Miércoles 17:00-19:00;#214914
+TADS POR;Grupo 2;Miércoles 19:00-21:00;#214914
