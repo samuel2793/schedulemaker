@@ -20,7 +20,7 @@
             text-align: center;
         }
         .conflict {
-            background-color: #f8d7da;
+            background-color: #f8d7da; /* Color de fondo para las celdas en conflicto */
         }
         .form-container {
             margin-bottom: 20px;
@@ -30,6 +30,11 @@
         }
         .group-item {
             margin: 5px 0;
+        }
+        .warning {
+            color: red;
+            font-weight: bold;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -53,6 +58,7 @@
         <label for="penalizeAfter20">Penalizar clases después de las 20:00</label><br>
         <button onclick="generateBestSchedule()">Generar Mejor Horario</button>
     </div>
+
     <h2>Horario</h2>
     <table id="scheduleTable">
         <thead>
@@ -69,6 +75,10 @@
             <!-- Las filas de horario se generarán aquí -->
         </tbody>
     </table>
+
+    <div id="warningMessage" class="warning" style="display: none;">
+        ¡Advertencia! Se han detectado solapamientos en el horario.
+    </div>
 
     <div class="group-list" id="groupList">
         <h3>Grupos Cargados</h3>
@@ -155,6 +165,7 @@
             const allCombinations = generateCombinations(enabledSubjects);
             let bestCombination = null;
             let bestScore = Infinity;
+            let hasConflicts = false;
 
             const penalizeAfternoon = document.getElementById('penalizeAfternoon').checked;
             const penalizeFriday = document.getElementById('penalizeFriday').checked;
@@ -171,9 +182,15 @@
             });
 
             if (bestCombination) {
-                displaySchedule(bestCombination);
+                hasConflicts = displaySchedule(bestCombination);
             } else {
                 alert("No se pudo generar un horario válido.");
+            }
+
+            if (hasConflicts) {
+                document.getElementById('warningMessage').style.display = 'block';
+            } else {
+                document.getElementById('warningMessage').style.display = 'none';
             }
         }
 
@@ -239,7 +256,7 @@
                 // Penalizar clases después de las 20:00
                 if (penalizeAfter20) {
                     const endHour = parseInt(endTime.split(':')[0]);
-                    if (endHour > 20 || (endHour === 20 && parseInt(endTime.split(':')[1]) > 0)) {
+                    if (endHour >= 21 || (endHour === 20 && parseInt(endTime.split(':')[1]) > 0)) {
                         score += 50;
                     }
                 }
@@ -268,6 +285,7 @@
         function displaySchedule(bestCombination) {
             const tableBody = document.getElementById('tableBody');
             tableBody.innerHTML = ''; // Limpiar tabla
+            let hasConflicts = false;
 
             const hours = [
                 '08:00-09:00', '09:00-10:00', '10:00-11:00', '11:00-12:00', 
@@ -289,7 +307,6 @@
                 const [startTime, endTime] = time.split('-');
                 const startRow = hours.findIndex(h => h.startsWith(startTime));
                 const endRow = hours.findIndex(h => h.startsWith(endTime));
-
                 const dayIndex = days.indexOf(day) + 1;
 
                 for (let i = startRow; i < endRow; i++) {
@@ -297,6 +314,7 @@
                     const cell = row.children[dayIndex];
                     if (cell.innerHTML) {
                         cell.classList.add('conflict');
+                        hasConflicts = true;
                     } else {
                         cell.innerHTML = `${subject} (${group})`;
                         cell.style.backgroundColor = color;
@@ -304,6 +322,8 @@
                     }
                 }
             });
+
+            return hasConflicts;
         }
     </script>
 </body>
