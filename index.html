@@ -38,6 +38,8 @@
     <div class="form-container">
         <input type="file" id="fileInput">
         <button onclick="loadFile()">Cargar Archivo Seleccionado</button>
+        <button onclick="loadPredefinedFile('sam1C.txt')">Cargar sam1C.txt</button>
+        <button onclick="loadPredefinedFile('sam2C.txt')">Cargar sam2C.txt</button>
         <br>
         <input type="checkbox" id="penalizeAfternoon" value="true">
         <label for="penalizeAfternoon">Penalizar grupos de tarde (después de las 15:00)</label><br>
@@ -78,22 +80,7 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const content = e.target.result;
-                    const lines = content.split('\n');
-                    lines.forEach(line => {
-                        const [subject, group, schedule, color] = line.split(';');
-                        if (subject && group && schedule && color) {
-                            if (!subjects[subject.trim()]) {
-                                subjects[subject.trim()] = [];
-                            }
-                            subjects[subject.trim()].push({
-                                subject: subject.trim(),
-                                group: group.trim(),
-                                schedule: schedule.trim(),
-                                color: color.trim(),
-                                enabled: true
-                            });
-                        }
-                    });
+                    parseContent(content);
                     alert("Asignaturas cargadas correctamente desde el archivo.");
                     renderGroupList();
                 };
@@ -101,6 +88,40 @@
             } else {
                 alert("Por favor, selecciona un archivo.");
             }
+        }
+
+        function loadPredefinedFile(fileName) {
+            fetch(`configs/${fileName}`)
+                .then(response => response.text())
+                .then(content => {
+                    parseContent(content);
+                    alert(`Asignaturas cargadas correctamente desde ${fileName}.`);
+                    renderGroupList();
+                })
+                .catch(error => {
+                    console.error("Error al cargar el archivo:", error);
+                    alert("Error al cargar el archivo de asignaturas.");
+                });
+        }
+
+        function parseContent(content) {
+            const lines = content.split('\n');
+            subjects = {}; // Resetear subjects para cada nueva carga
+            lines.forEach(line => {
+                const [subject, group, schedule, color] = line.split(';');
+                if (subject && group && schedule && color) {
+                    if (!subjects[subject.trim()]) {
+                        subjects[subject.trim()] = [];
+                    }
+                    subjects[subject.trim()].push({
+                        subject: subject.trim(),
+                        group: group.trim(),
+                        schedule: schedule.trim(),
+                        color: color.trim(),
+                        enabled: true
+                    });
+                }
+            });
         }
 
         function renderGroupList() {
