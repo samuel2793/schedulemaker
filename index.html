@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organizador de Horarios</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        .conflict {
+            background-color: #f8d7da;
+        }
+        .form-container {
+            margin-bottom: 20px;
+        }
+        .group-list {
+            margin-top: 20px;
+        }
+        .group-item {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Organizador de Horarios Universitarios</h1>
+    <div class="form-container">
+        <input type="file" id="fileInput">
+        <button onclick="loadFile()">Cargar Archivo Seleccionado</button>
+        <br>
+        <input type="checkbox" id="penalizeAfternoon" value="true">
+        <label for="penalizeAfternoon">Penalizar grupos de tarde (después de las 15:00)</label><br>
+        <input type="checkbox" id="penalizeFriday" value="true">
+        <label for="penalizeFriday">Penalizar grupos de los viernes</label><br>
+        <button onclick="generateBestSchedule()">Generar Mejor Horario</button>
+    </div>
+    <h2>Horario</h2>
+    <table id="scheduleTable">
+        <thead>
+            <tr>
+                <th>Hora</th>
+                <th>Lunes</th>
+                <th>Martes</th>
+                <th>Miércoles</th>
+                <th>Jueves</th>
+                <th>Viernes</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- Las filas de horario se generarán aquí -->
+        </tbody>
+    </table>
+
+    <div class="group-list" id="groupList">
+        <h3>Grupos Cargados</h3>
+        <!-- Los grupos se mostrarán aquí -->
+    </div>
+
+    <script>
+        let subjects = {};
+
+        function loadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    const lines = content.split('\n');
+                    lines.forEach(line => {
+                        const [subject, group, schedule, color] = line.split(';');
+                        if (subject && group && schedule && color) {
+                            if (!subjects[subject.trim()]) {
+                                subjects[subject.trim()] = [];
+                            }
+                            subjects[subject.trim()].push({
+                                subject: subject.trim(),
+                                group: group.trim(),
+                                schedule: schedule.trim(),
+                                color: color.trim(),
+                                enabled: true
+                            });
+                        }
+                    });
+                    alert("Asignaturas cargadas correctamente desde el archivo.");
+                    renderGroupList();
+                };
+                reader.readAsText(file);
+            } else {
+                alert("Por favor, selecciona un archivo.");
+            }
+        }
+
+        function renderGroupList() {
+            const groupList = document.getElementById('groupList');
+            groupList.innerHTML = '<h3>Grupos Cargados</h3>';
+            Object.keys(subjects).forEach(subject => {
+                subjects[subject].forEach((group, index) => {
+                    const groupItem = document.createElement('div');
+                    groupItem.classList.add('group-item');
+                    groupItem.innerHTML = `
+                        <input type="checkbox" id="group_${subject}_${index}" checked onchange="toggleGroup('${subject}', ${index})">
+                        <label for="group_${subject}_${index}" style="color: ${group.color}">${subject} - ${group.group} (${group.schedule})</label>
+                    `;
+                    groupList.appendChild(groupItem);
+                });
+            });
+        }
+
+        function toggleGroup(subject, index) {
+            subjects[subject][index].enabled = !subjects[subject][index].enabled;
+        }
+
+        function generateBestSchedule() {
+            const enabledSubjects = Object.values(subjects).map(groups => groups.filter(group => group.enabled));
+            const allCombinations = generateCombinations(enabledSubjects);
+            let bestCombination = null;
+            let bestScore = Infinity;
+
+            const penalizeAfternoon = document.getElementById('penalizeAfternoon').checked;
+            const penalizeFriday = document.getElementById('penalizeFriday').checked;
+
+            allCombinations.forEach(combination => {
+                const score = evaluateSchedule(combination, penalizeAfternoon, penalizeFriday);
+                if (score < bestScore) {
+                    bestScore = score;
+                    bestCombination = combination;
+                }
+            });
+
+            if (bestCombination) {
+                displaySchedule(bestCombination);
+            } else {
+                alert("No se pudo generar un horario válido.");
+            }
+        }
+
+        function generateCombinations(arrays) {
+            if (arrays.length === 0) return [[]];
+            const firstArray = arrays[0];
+            const restCombinations = generateCombinations(arrays.slice(1));
+            const combinations = [];
+
+            firstArray.forEach(element => {
+                restCombinations.forEach(combination => {
+                    combinations.push([element, ...combination]);
+                });
+            });
+
+            return combinations;
+        }
+
+        function evaluateSchedule(schedule, penalizeAfternoon, penalizeFriday) {
+            const timeSlots = {};
+            let score = 0;
+
+            schedule.forEach(({ schedule }) => {
+                const [day, time] = schedule.split(' ');
+                const [startTime, endTime] = time.split('-');
+                const daySlot = `${day}-${startTime}-${endTime}`;
+
+                // Penalizar solapamientos
+                if (timeSlots[daySlot]) {
+                    score += 100;
+                } else {
+                    timeSlots[daySlot] = true;
+                }
+
+                // Penalizar grupos de tarde (después de las 15:00)
+                if (penalizeAfternoon) {
+                    const startHour = parseInt(startTime.split(':')[0]);
+                    if (startHour >= 15) {
+                        score += 50;
+                    }
+                }
+
+                // Penalizar grupos de los viernes
+                if (penalizeFriday && day === 'Viernes') {
+                    score += 50;
+                }
+            });
+
+            return score;
+        }
+
+        function displaySchedule(bestCombination) {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = ''; // Limpiar tabla
+
+            const hours = [
+                '08:00-09:00', '09:00-10:00', '10:00-11:00', '11:00-12:00', 
+                '12:00-13:00', '13:00-14:00', '14:00-15:00', '15:00-16:00', 
+                '16:00-17:00', '17:00-18:00', '18:00-19:00', '19:00-20:00', '20:00-21:00'
+            ];
+
+            const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+
+            hours.forEach(hour => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${hour}</td><td></td><td></td><td></td><td></td><td></td>`;
+                tableBody.appendChild(row);
+            });
+
+            bestCombination.forEach(({ subject, group, schedule, color }) => {
+                const [day, time] = schedule.split(' ');
+                const [startTime, endTime] = time.split('-');
+                const startRow = hours.findIndex(h => h.startsWith(startTime));
+                const endRow = hours.findIndex(h => h.startsWith(endTime));
+                const dayIndex = days.indexOf(day) + 1;
+
+                for (let i = startRow; i < endRow; i++) {
+                    const row = tableBody.children[i];
+                    const cell = row.children[dayIndex];
+                    if (cell.innerHTML) {
+                        cell.classList.add('conflict');
+                    } else {
+                        cell.innerHTML = `${subject} (${group})`;
+                        cell.style.backgroundColor = color;
+                        cell.style.color = '#fff'; // Texto blanco para mejor visibilidad
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

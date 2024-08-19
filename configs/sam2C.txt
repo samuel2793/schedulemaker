@@ -1,0 +1,5 @@
+Matemáticas;Grupo 1;Lunes 08:00-10:00;#FF5733
+Matemáticas;Grupo 2;Martes 10:00-12:00;#FF5733
+Física;Grupo 1;Miércoles 11:00-13:00;#33FF57
+Física;Grupo 2;Jueves 14:00-16:00;#33FF57
+Química;Grupo 1;Viernes 09:00-11:00;#3357FF
