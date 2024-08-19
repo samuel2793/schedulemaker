@@ -49,6 +49,8 @@
         <label for="penalizeGaps">Penalizar huecos entre grupos</label><br>
         <input type="checkbox" id="penalizeBefore10" value="true">
         <label for="penalizeBefore10">Penalizar clases antes de las 10:00 AM</label><br>
+        <input type="checkbox" id="penalizeAfter20" value="true">
+        <label for="penalizeAfter20">Penalizar clases después de las 20:00</label><br>
         <button onclick="generateBestSchedule()">Generar Mejor Horario</button>
     </div>
     <h2>Horario</h2>
@@ -158,9 +160,10 @@
             const penalizeFriday = document.getElementById('penalizeFriday').checked;
             const penalizeGaps = document.getElementById('penalizeGaps').checked;
             const penalizeBefore10 = document.getElementById('penalizeBefore10').checked;
+            const penalizeAfter20 = document.getElementById('penalizeAfter20').checked;
 
             allCombinations.forEach(combination => {
-                const score = evaluateSchedule(combination, penalizeAfternoon, penalizeFriday, penalizeGaps, penalizeBefore10);
+                const score = evaluateSchedule(combination, penalizeAfternoon, penalizeFriday, penalizeGaps, penalizeBefore10, penalizeAfter20);
                 if (score < bestScore) {
                     bestScore = score;
                     bestCombination = combination;
@@ -189,7 +192,7 @@
             return combinations;
         }
 
-        function evaluateSchedule(schedule, penalizeAfternoon, penalizeFriday, penalizeGaps, penalizeBefore10) {
+        function evaluateSchedule(schedule, penalizeAfternoon, penalizeFriday, penalizeGaps, penalizeBefore10, penalizeAfter20) {
             const timeSlots = {};
             let score = 0;
             const daySchedules = {
@@ -233,6 +236,14 @@
                     }
                 }
 
+                // Penalizar clases después de las 20:00
+                if (penalizeAfter20) {
+                    const endHour = parseInt(endTime.split(':')[0]);
+                    if (endHour > 20 || (endHour === 20 && parseInt(endTime.split(':')[1]) > 0)) {
+                        score += 50;
+                    }
+                }
+
                 // Añadir el horario a la lista del día correspondiente
                 daySchedules[day].push({ startTime, endTime });
             });
@@ -261,7 +272,8 @@
             const hours = [
                 '08:00-09:00', '09:00-10:00', '10:00-11:00', '11:00-12:00', 
                 '12:00-13:00', '13:00-14:00', '14:00-15:00', '15:00-16:00', 
-                '16:00-17:00', '17:00-18:00', '18:00-19:00', '19:00-20:00', '20:00-21:00'
+                '16:00-17:00', '17:00-18:00', '18:00-19:00', '19:00-20:00', 
+                '20:00-21:00'
             ];
 
             const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
