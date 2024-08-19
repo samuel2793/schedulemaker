@@ -45,6 +45,8 @@
         <label for="penalizeAfternoon">Penalizar grupos de tarde (después de las 15:00)</label><br>
         <input type="checkbox" id="penalizeFriday" value="true">
         <label for="penalizeFriday">Penalizar grupos de los viernes</label><br>
+        <input type="checkbox" id="penalizeGaps" value="true">
+        <label for="penalizeGaps">Penalizar huecos entre grupos</label><br>
         <button onclick="generateBestSchedule()">Generar Mejor Horario</button>
     </div>
     <h2>Horario</h2>
@@ -152,9 +154,10 @@
 
             const penalizeAfternoon = document.getElementById('penalizeAfternoon').checked;
             const penalizeFriday = document.getElementById('penalizeFriday').checked;
+            const penalizeGaps = document.getElementById('penalizeGaps').checked;
 
             allCombinations.forEach(combination => {
-                const score = evaluateSchedule(combination, penalizeAfternoon, penalizeFriday);
+                const score = evaluateSchedule(combination, penalizeAfternoon, penalizeFriday, penalizeGaps);
                 if (score < bestScore) {
                     bestScore = score;
                     bestCombination = combination;
@@ -183,9 +186,16 @@
             return combinations;
         }
 
-        function evaluateSchedule(schedule, penalizeAfternoon, penalizeFriday) {
+        function evaluateSchedule(schedule, penalizeAfternoon, penalizeFriday, penalizeGaps) {
             const timeSlots = {};
             let score = 0;
+            const daySchedules = {
+                'Lunes': [],
+                'Martes': [],
+                'Miércoles': [],
+                'Jueves': [],
+                'Viernes': []
+            };
 
             schedule.forEach(({ schedule }) => {
                 const [day, time] = schedule.split(' ');
@@ -211,7 +221,24 @@
                 if (penalizeFriday && day === 'Viernes') {
                     score += 50;
                 }
+
+                // Añadir el horario a la lista del día correspondiente
+                daySchedules[day].push({ startTime, endTime });
             });
+
+            // Penalizar huecos entre grupos
+            if (penalizeGaps) {
+                Object.keys(daySchedules).forEach(day => {
+                    const sortedSchedules = daySchedules[day].sort((a, b) => a.startTime.localeCompare(b.startTime));
+                    for (let i = 1; i < sortedSchedules.length; i++) {
+                        const previousEndTime = sortedSchedules[i - 1].endTime;
+                        const currentStartTime = sortedSchedules[i].startTime;
+                        if (previousEndTime < currentStartTime) {
+                            score += 20; // Penalización por cada hueco entre grupos
+                        }
+                    }
+                });
+            }
 
             return score;
         }
