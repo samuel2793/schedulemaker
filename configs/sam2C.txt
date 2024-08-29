@@ -3,9 +3,9 @@ GCS PPR;Grupo 1;Martes 17:00-18:00;#2225CB
 GCS PPR;Grupo 2;Martes 19:00-20:00;#2225CB
 GCS POR;Grupo 1;Martes 18:00-19:00;#2225CB
 GCS POR;Grupo 2;Martes 20:00-21:00;#2225CB
-MTIS TEO;Grupo 1;Miércoles 09:00-11:00;#7B52A9
-MTIS POR;Grupo 1;Miércoles 15:00-17:00;#7B52A9
-MTIS POR;Grupo 2;Miércoles 19:00-21:00;#7B52A9
+MTIS TEO;Grupo 1;Miércoles 11:00-13:00;#7B52A9
+MTIS POR;Grupo 1;Miércoles 09:00-11:00;#7B52A9
+MTIS POR;Grupo 2;Miércoles 13:00-15:00;#7B52A9
 PPSS POR;Grupo 2 (Evitar Profesor);Lunes 09:00-11:00;#078519
 PPSS POR;Grupo 4 (Evitar Profesor)ARA;Lunes 11:00-13:00;#078519
 PPSS TEO;Grupo 2 ARA;Lunes 13:00-15:00;#078519
@@ -23,6 +23,6 @@ PPSS POR;Grupo 7;Miércoles 19:00-21:00;#078519
 SDS TEO;Grupo 1;Martes 09:00-11:00;#CA001A
 SDS POR;Grupo 1;Martes 11:00-13:00;#CA001A
 SDS POR;Grupo 2;Martes 13:00-15:00;#CA001A
-TADS TEO;Grupo 1;Miércoles 15:00-17:00;#214914
-TADS POR;Grupo 1;Miércoles 17:00-19:00;#214914
-TADS POR;Grupo 2;Miércoles 19:00-21:00;#214914
+TAES TEO;Grupo 1;Miércoles 15:00-17:00;#214914
+TAES POR;Grupo 1;Miércoles 17:00-19:00;#214914
+TAES POR;Grupo 2;Miércoles 19:00-21:00;#214914
