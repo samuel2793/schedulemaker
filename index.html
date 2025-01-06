@@ -1,344 +1,419 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Organizador de Horarios</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        table, th, td {
-            border: 1px solid black;
-        }
-        th, td {
-            padding: 10px;
-            text-align: center;
-        }
-        .conflict {
-            background-color: #f8d7da; /* Color de fondo para las celdas en conflicto */
-        }
-        .form-container {
-            margin-bottom: 20px;
-        }
-        .group-list {
-            margin-top: 20px;
-        }
-        .group-item {
-            margin: 5px 0;
-        }
-        .warning {
-            color: red;
-            font-weight: bold;
-            margin-top: 20px;
-        }
-    </style>
-</head>
-<body>
-    <h1>Organizador de Horarios Universitarios</h1>
-    <div class="form-container">
-        <input type="file" id="fileInput">
-        <button onclick="loadFile()">Cargar Archivo Seleccionado</button>
-        <button onclick="loadPredefinedFile('sam1C.txt')">Cargar sam1C.txt</button>
-        <button onclick="loadPredefinedFile('sam2C.txt')">Cargar sam2C.txt</button>
-        <br>
-        <input type="checkbox" id="penalizeAfternoon" value="true">
-        <label for="penalizeAfternoon">Penalizar grupos de tarde (después de las 15:00)</label><br>
-        <input type="checkbox" id="penalizeFriday" value="true">
-        <label for="penalizeFriday">Penalizar grupos de los viernes</label><br>
-        <input type="checkbox" id="penalizeGaps" value="true">
-        <label for="penalizeGaps">Penalizar huecos entre grupos</label><br>
-        <input type="checkbox" id="penalizeBefore10" value="true">
-        <label for="penalizeBefore10">Penalizar clases antes de las 10:00 AM</label><br>
-        <input type="checkbox" id="penalizeAfter20" value="true">
-        <label for="penalizeAfter20">Penalizar clases después de las 20:00</label><br>
-        <button onclick="generateBestSchedule()">Generar Mejor Horario</button>
-    </div>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Organizador de Horarios</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+			}
+			table {
+				width: 100%;
+				border-collapse: collapse;
+			}
+			table,
+			th,
+			td {
+				border: 1px solid black;
+			}
+			th,
+			td {
+				padding: 10px;
+				text-align: center;
+			}
+			.conflict {
+				background-color: #f8d7da; /* Color de fondo para las celdas en conflicto */
+			}
+			.form-container {
+				margin-bottom: 20px;
+			}
+			.group-list {
+				margin-top: 20px;
+			}
+			.group-item {
+				margin: 5px 0;
+			}
+			.warning {
+				color: red;
+				font-weight: bold;
+				margin-top: 20px;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Organizador de Horarios Universitarios</h1>
+		<div class="form-container">
+			<input type="file" id="fileInput" />
+			<button onclick="loadFile()">Cargar Archivo Seleccionado</button>
+			<button onclick="loadPredefinedFile('sam1C.txt')">
+				Cargar sam1C.txt
+			</button>
+			<button onclick="loadPredefinedFile('sam2C.txt')">
+				Cargar sam2C.txt
+			</button>
+			<br />
+			<input type="checkbox" id="penalizeAfternoon" value="true" />
+			<label for="penalizeAfternoon"
+				>Penalizar grupos de tarde (después de las 15:00)</label
+			><br />
+			<input type="checkbox" id="penalizeFriday" value="true" />
+			<label for="penalizeFriday">Penalizar grupos de los viernes</label><br />
+			<input type="checkbox" id="penalizeGaps" value="true" />
+			<label for="penalizeGaps">Penalizar huecos entre grupos</label><br />
+			<input type="checkbox" id="penalizeBefore10" value="true" />
+			<label for="penalizeBefore10"
+				>Penalizar clases antes de las 10:00 AM</label
+			><br />
+			<input type="checkbox" id="penalizeAfter20" value="true" />
+			<label for="penalizeAfter20">Penalizar clases después de las 20:00</label
+			><br />
+			<button onclick="generateBestSchedule()">Generar Mejor Horario</button>
+		</div>
 
-    <h2>Horario</h2>
-    <table id="scheduleTable">
-        <thead>
-            <tr>
-                <th>Hora</th>
-                <th>Lunes</th>
-                <th>Martes</th>
-                <th>Miércoles</th>
-                <th>Jueves</th>
-                <th>Viernes</th>
-            </tr>
-        </thead>
-        <tbody id="tableBody">
-            <!-- Las filas de horario se generarán aquí -->
-        </tbody>
-    </table>
+		<h2>Horario</h2>
+		<table id="scheduleTable">
+			<thead>
+				<tr>
+					<th>Hora</th>
+					<th>Lunes</th>
+					<th>Martes</th>
+					<th>Miércoles</th>
+					<th>Jueves</th>
+					<th>Viernes</th>
+				</tr>
+			</thead>
+			<tbody id="tableBody">
+				<!-- Las filas de horario se generarán aquí -->
+			</tbody>
+		</table>
 
-    <div id="warningMessage" class="warning" style="display: none;">
-        <!-- Mensajes de error de solapamiento se mostrarán aquí -->
-    </div>
+		<div id="warningMessage" class="warning" style="display: none">
+			<!-- Mensajes de error de solapamiento se mostrarán aquí -->
+		</div>
 
-    <div class="group-list" id="groupList">
-        <h3>Grupos Cargados</h3>
-        <!-- Los grupos se mostrarán aquí -->
-    </div>
+		<div class="group-list" id="groupList">
+			<h3>Grupos Cargados</h3>
+			<!-- Los grupos se mostrarán aquí -->
+		</div>
 
-    <script>
-        let subjects = {};
+		<script>
+			let subjects = {};
 
-        function loadFile() {
-            const fileInput = document.getElementById('fileInput');
-            const file = fileInput.files[0];
+			function loadFile() {
+				const fileInput = document.getElementById("fileInput");
+				const file = fileInput.files[0];
 
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const content = e.target.result;
-                    parseContent(content);
-                    alert("Asignaturas cargadas correctamente desde el archivo.");
-                    renderGroupList();
-                };
-                reader.readAsText(file);
-            } else {
-                alert("Por favor, selecciona un archivo.");
-            }
-        }
+				if (file) {
+					const reader = new FileReader();
+					reader.onload = function (e) {
+						const content = e.target.result;
+						parseContent(content);
+						alert("Asignaturas cargadas correctamente desde el archivo.");
+						renderGroupList();
+					};
+					reader.readAsText(file);
+				} else {
+					alert("Por favor, selecciona un archivo.");
+				}
+			}
 
-        function loadPredefinedFile(fileName) {
-            fetch(`configs/${fileName}`)
-                .then(response => response.text())
-                .then(content => {
-                    parseContent(content);
-                    alert(`Asignaturas cargadas correctamente desde ${fileName}.`);
-                    renderGroupList();
-                })
-                .catch(error => {
-                    console.error("Error al cargar el archivo:", error);
-                    alert("Error al cargar el archivo de asignaturas.");
-                });
-        }
+			function loadPredefinedFile(fileName) {
+				fetch(`configs/${fileName}`)
+					.then((response) => response.text())
+					.then((content) => {
+						parseContent(content);
+						alert(`Asignaturas cargadas correctamente desde ${fileName}.`);
+						renderGroupList();
+					})
+					.catch((error) => {
+						console.error("Error al cargar el archivo:", error);
+						alert("Error al cargar el archivo de asignaturas.");
+					});
+			}
 
-        function parseContent(content) {
-            const lines = content.split('\n');
-            subjects = {}; // Resetear subjects para cada nueva carga
-            lines.forEach(line => {
-                const [subject, group, schedule, color] = line.split(';');
-                if (subject && group && schedule && color) {
-                    if (!subjects[subject.trim()]) {
-                        subjects[subject.trim()] = [];
-                    }
-                    subjects[subject.trim()].push({
-                        subject: subject.trim(),
-                        group: group.trim(),
-                        schedule: schedule.trim(),
-                        color: color.trim(),
-                        enabled: true
-                    });
-                }
-            });
-        }
+			function parseContent(content) {
+				const lines = content.split("\n");
+				subjects = {}; // Resetear subjects para cada nueva carga
+				lines.forEach((line) => {
+					const [subject, group, schedule, color] = line.split(";");
+					if (subject && group && schedule && color) {
+						if (!subjects[subject.trim()]) {
+							subjects[subject.trim()] = [];
+						}
+						subjects[subject.trim()].push({
+							subject: subject.trim(),
+							group: group.trim(),
+							schedule: schedule.trim(),
+							color: color.trim(),
+							enabled: true,
+						});
+					}
+				});
+			}
 
-        function renderGroupList() {
-            const groupList = document.getElementById('groupList');
-            groupList.innerHTML = '<h3>Grupos Cargados</h3>';
-            Object.keys(subjects).forEach(subject => {
-                subjects[subject].forEach((group, index) => {
-                    const groupItem = document.createElement('div');
-                    groupItem.classList.add('group-item');
-                    groupItem.innerHTML = `
+			function renderGroupList() {
+				const groupList = document.getElementById("groupList");
+				groupList.innerHTML = "<h3>Grupos Cargados</h3>";
+				Object.keys(subjects).forEach((subject) => {
+					subjects[subject].forEach((group, index) => {
+						const groupItem = document.createElement("div");
+						groupItem.classList.add("group-item");
+						groupItem.innerHTML = `
                         <input type="checkbox" id="group_${subject}_${index}" checked onchange="toggleGroup('${subject}', ${index})">
                         <label for="group_${subject}_${index}" style="color: ${group.color}">${subject} - ${group.group} (${group.schedule})</label>
                     `;
-                    groupList.appendChild(groupItem);
-                });
-            });
-        }
+						groupList.appendChild(groupItem);
+					});
+				});
+			}
 
-        function toggleGroup(subject, index) {
-            subjects[subject][index].enabled = !subjects[subject][index].enabled;
-        }
+			function toggleGroup(subject, index) {
+				subjects[subject][index].enabled = !subjects[subject][index].enabled;
+			}
 
-        function generateBestSchedule() {
-            const enabledSubjects = Object.values(subjects).map(groups => groups.filter(group => group.enabled));
-            const allCombinations = generateCombinations(enabledSubjects);
-            let bestCombination = null;
-            let bestScore = Infinity;
-            let conflicts = [];
+			function generateBestSchedule() {
+				// 1. Verificar asignaturas sin selección
+				const subjectsWithoutSelection = Object.keys(subjects).filter(subject => {
+					return subjects[subject].every(group => !group.enabled);
+				});
+				
+				if (subjectsWithoutSelection.length > 0) {
+					const msg = `No se seleccionaron grupos para: ${subjectsWithoutSelection.join(', ')}.\n\n` + 
+								"¿Deseas continuar sin estas asignaturas?";
+					const confirmation = confirm(msg);
+					if (!confirmation) {
+						return; // el usuario NO quiere proseguir
+					} else {
+						// El usuario sí quiere proseguir sin estas asignaturas,
+						// pero en vez de borrar, simplemente dejaremos la asignatura con enabled=false en todos sus grupos.
+					}
+				}
+			
+				// 2. Tomar solo las asignaturas con grupos habilitados
+				let enabledSubjectsArrays = Object.values(subjects).map(groups => groups.filter(g => g.enabled));
+				// 2.1. Filtrar sub-arreglos vacíos
+				enabledSubjectsArrays = enabledSubjectsArrays.filter(arr => arr.length > 0);
+			
+				// 3. Si después de filtrar no queda nada, significa que se deshabilitaron todas las asignaturas
+				if (enabledSubjectsArrays.length === 0) {
+					alert("No hay asignaturas seleccionadas. Se generará un horario vacío.");
+					// Aquí puedes decidir si quieres mostrar un horario vacío o simplemente detener.
+					return;
+				}
+			
+				// 4. Generamos las combinaciones
+				const allCombinations = generateCombinations(enabledSubjectsArrays);
+			
+				// 5. Calculamos el mejor horario
+				let bestCombination = null;
+				let bestScore = Infinity;
+				let conflicts = [];
+			
+				const penalizeAfternoon = document.getElementById('penalizeAfternoon').checked;
+				const penalizeFriday = document.getElementById('penalizeFriday').checked;
+				const penalizeGaps = document.getElementById('penalizeGaps').checked;
+				const penalizeBefore10 = document.getElementById('penalizeBefore10').checked;
+				const penalizeAfter20 = document.getElementById('penalizeAfter20').checked;
+			
+				allCombinations.forEach(combination => {
+					const score = evaluateSchedule(
+						combination,
+						penalizeAfternoon,
+						penalizeFriday,
+						penalizeGaps,
+						penalizeBefore10,
+						penalizeAfter20
+					);
+					if (score < bestScore) {
+						bestScore = score;
+						bestCombination = combination;
+					}
+				});
+			
+				// 6. Mostrar o no el mejor horario
+				if (!bestCombination) {
+					alert("No se pudo generar un horario válido.");
+					return;
+				}
+				conflicts = displaySchedule(bestCombination);
 
-            const penalizeAfternoon = document.getElementById('penalizeAfternoon').checked;
-            const penalizeFriday = document.getElementById('penalizeFriday').checked;
-            const penalizeGaps = document.getElementById('penalizeGaps').checked;
-            const penalizeBefore10 = document.getElementById('penalizeBefore10').checked;
-            const penalizeAfter20 = document.getElementById('penalizeAfter20').checked;
+				if (conflicts.length > 0) {
+					document.getElementById("warningMessage").style.display = "block";
+					document.getElementById("warningMessage").innerHTML =
+						generateConflictMessage(conflicts);
+				} else {
+					document.getElementById("warningMessage").style.display = "none";
+				}
+			}
 
-            allCombinations.forEach(combination => {
-                const score = evaluateSchedule(combination, penalizeAfternoon, penalizeFriday, penalizeGaps, penalizeBefore10, penalizeAfter20);
-                if (score < bestScore) {
-                    bestScore = score;
-                    bestCombination = combination;
-                }
-            });
+			function generateCombinations(arrays) {
+				if (arrays.length === 0) return [[]];
+				const firstArray = arrays[0];
+				const restCombinations = generateCombinations(arrays.slice(1));
+				const combinations = [];
 
-            if (bestCombination) {
-                conflicts = displaySchedule(bestCombination);
-            } else {
-                alert("No se pudo generar un horario válido.");
-            }
+				firstArray.forEach((element) => {
+					restCombinations.forEach((combination) => {
+						combinations.push([element, ...combination]);
+					});
+				});
 
-            if (conflicts.length > 0) {
-                document.getElementById('warningMessage').style.display = 'block';
-                document.getElementById('warningMessage').innerHTML = generateConflictMessage(conflicts);
-            } else {
-                document.getElementById('warningMessage').style.display = 'none';
-            }
-        }
+				return combinations;
+			}
 
-        function generateCombinations(arrays) {
-            if (arrays.length === 0) return [[]];
-            const firstArray = arrays[0];
-            const restCombinations = generateCombinations(arrays.slice(1));
-            const combinations = [];
+			function evaluateSchedule(
+				schedule,
+				penalizeAfternoon,
+				penalizeFriday,
+				penalizeGaps,
+				penalizeBefore10,
+				penalizeAfter20
+			) {
+				const timeSlots = {};
+				let score = 0;
+				const daySchedules = {
+					Lunes: [],
+					Martes: [],
+					Miércoles: [],
+					Jueves: [],
+					Viernes: [],
+				};
 
-            firstArray.forEach(element => {
-                restCombinations.forEach(combination => {
-                    combinations.push([element, ...combination]);
-                });
-            });
+				schedule.forEach(({ schedule }) => {
+					const [day, time] = schedule.split(" ");
+					const [startTime, endTime] = time.split("-");
+					const daySlot = `${day}-${startTime}-${endTime}`;
 
-            return combinations;
-        }
+					// Penalizar solapamientos
+					if (timeSlots[daySlot]) {
+						score += 100;
+					} else {
+						timeSlots[daySlot] = true;
+					}
 
-        function evaluateSchedule(schedule, penalizeAfternoon, penalizeFriday, penalizeGaps, penalizeBefore10, penalizeAfter20) {
-            const timeSlots = {};
-            let score = 0;
-            const daySchedules = {
-                'Lunes': [],
-                'Martes': [],
-                'Miércoles': [],
-                'Jueves': [],
-                'Viernes': []
-            };
+					// Penalizar grupos de tarde (después de las 15:00)
+					if (penalizeAfternoon) {
+						const startHour = parseInt(startTime.split(":")[0]);
+						if (startHour >= 15) {
+							score += 50;
+						}
+					}
 
-            schedule.forEach(({ schedule }) => {
-                const [day, time] = schedule.split(' ');
-                const [startTime, endTime] = time.split('-');
-                const daySlot = `${day}-${startTime}-${endTime}`;
+					// Penalizar grupos de los viernes
+					if (penalizeFriday && day === "Viernes") {
+						score += 50;
+					}
 
-                // Penalizar solapamientos
-                if (timeSlots[daySlot]) {
-                    score += 100;
-                } else {
-                    timeSlots[daySlot] = true;
-                }
+					// Penalizar clases antes de las 10:00 AM
+					if (penalizeBefore10) {
+						const startHour = parseInt(startTime.split(":")[0]);
+						if (startHour < 10) {
+							score += 50;
+						}
+					}
 
-                // Penalizar grupos de tarde (después de las 15:00)
-                if (penalizeAfternoon) {
-                    const startHour = parseInt(startTime.split(':')[0]);
-                    if (startHour >= 15) {
-                        score += 50;
-                    }
-                }
+					// Penalizar clases después de las 20:00
+					if (penalizeAfter20) {
+						const endHour = parseInt(endTime.split(":")[0]);
+						if (
+							endHour >= 21 ||
+							(endHour === 20 && parseInt(endTime.split(":")[1]) > 0)
+						) {
+							score += 50;
+						}
+					}
 
-                // Penalizar grupos de los viernes
-                if (penalizeFriday && day === 'Viernes') {
-                    score += 50;
-                }
+					// Añadir el horario a la lista del día correspondiente
+					daySchedules[day].push({ startTime, endTime });
+				});
 
-                // Penalizar clases antes de las 10:00 AM
-                if (penalizeBefore10) {
-                    const startHour = parseInt(startTime.split(':')[0]);
-                    if (startHour < 10) {
-                        score += 50;
-                    }
-                }
+				// Penalizar huecos entre grupos
+				if (penalizeGaps) {
+					Object.keys(daySchedules).forEach((day) => {
+						const sortedSchedules = daySchedules[day].sort((a, b) =>
+							a.startTime.localeCompare(b.startTime)
+						);
+						for (let i = 1; i < sortedSchedules.length; i++) {
+							const previousEndTime = sortedSchedules[i - 1].endTime;
+							const currentStartTime = sortedSchedules[i].startTime;
+							if (previousEndTime < currentStartTime) {
+								score += 20; // Penalización por cada hueco entre grupos
+							}
+						}
+					});
+				}
 
-                // Penalizar clases después de las 20:00
-                if (penalizeAfter20) {
-                    const endHour = parseInt(endTime.split(':')[0]);
-                    if (endHour >= 21 || (endHour === 20 && parseInt(endTime.split(':')[1]) > 0)) {
-                        score += 50;
-                    }
-                }
+				return score;
+			}
 
-                // Añadir el horario a la lista del día correspondiente
-                daySchedules[day].push({ startTime, endTime });
-            });
+			function displaySchedule(bestCombination) {
+				const tableBody = document.getElementById("tableBody");
+				tableBody.innerHTML = ""; // Limpiar tabla
+				let conflicts = [];
 
-            // Penalizar huecos entre grupos
-            if (penalizeGaps) {
-                Object.keys(daySchedules).forEach(day => {
-                    const sortedSchedules = daySchedules[day].sort((a, b) => a.startTime.localeCompare(b.startTime));
-                    for (let i = 1; i < sortedSchedules.length; i++) {
-                        const previousEndTime = sortedSchedules[i - 1].endTime;
-                        const currentStartTime = sortedSchedules[i].startTime;
-                        if (previousEndTime < currentStartTime) {
-                            score += 20; // Penalización por cada hueco entre grupos
-                        }
-                    }
-                });
-            }
+				const hours = [
+					"08:00-09:00",
+					"09:00-10:00",
+					"10:00-11:00",
+					"11:00-12:00",
+					"12:00-13:00",
+					"13:00-14:00",
+					"14:00-15:00",
+					"15:00-16:00",
+					"16:00-17:00",
+					"17:00-18:00",
+					"18:00-19:00",
+					"19:00-20:00",
+					"20:00-21:00",
+					"21:00-22:00",
+				];
 
-            return score;
-        }
+				const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
 
-        function displaySchedule(bestCombination) {
-            const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = ''; // Limpiar tabla
-            let conflicts = [];
+				hours.forEach((hour) => {
+					const row = document.createElement("tr");
+					row.innerHTML = `<td>${hour}</td><td></td><td></td><td></td><td></td><td></td>`;
+					tableBody.appendChild(row);
+				});
 
-            const hours = [
-                '08:00-09:00', '09:00-10:00', '10:00-11:00', '11:00-12:00', 
-                '12:00-13:00', '13:00-14:00', '14:00-15:00', '15:00-16:00', 
-                '16:00-17:00', '17:00-18:00', '18:00-19:00', '19:00-20:00', 
-                '20:00-21:00', '21:00-22:00'
-            ];
+				bestCombination.forEach(({ subject, group, schedule, color }) => {
+					const [day, time] = schedule.split(" ");
+					const [startTime, endTime] = time.split("-");
+					const startRow = hours.findIndex((h) => h.startsWith(startTime));
+					const endRow = hours.findIndex((h) => h.startsWith(endTime));
+					const dayIndex = days.indexOf(day) + 1;
 
-            const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+					for (let i = startRow; i < endRow; i++) {
+						const row = tableBody.children[i];
+						const cell = row.children[dayIndex];
+						if (cell.innerHTML) {
+							conflicts.push({
+								day,
+								hour: hours[i],
+								subject1: cell.innerHTML,
+								subject2: `${subject} (${group})`,
+							});
+							cell.classList.add("conflict");
+						} else {
+							cell.innerHTML = `${subject} (${group})`;
+							cell.style.backgroundColor = color;
+							cell.style.color = "#fff"; // Texto blanco para mejor visibilidad
+						}
+					}
+				});
 
-            hours.forEach(hour => {
-                const row = document.createElement('tr');
-                row.innerHTML = `<td>${hour}</td><td></td><td></td><td></td><td></td><td></td>`;
-                tableBody.appendChild(row);
-            });
+				return conflicts;
+			}
 
-            bestCombination.forEach(({ subject, group, schedule, color }) => {
-                const [day, time] = schedule.split(' ');
-                const [startTime, endTime] = time.split('-');
-                const startRow = hours.findIndex(h => h.startsWith(startTime));
-                const endRow = hours.findIndex(h => h.startsWith(endTime));
-                const dayIndex = days.indexOf(day) + 1;
-
-                for (let i = startRow; i < endRow; i++) {
-                    const row = tableBody.children[i];
-                    const cell = row.children[dayIndex];
-                    if (cell.innerHTML) {
-                        conflicts.push({
-                            day,
-                            hour: hours[i],
-                            subject1: cell.innerHTML,
-                            subject2: `${subject} (${group})`
-                        });
-                        cell.classList.add('conflict');
-                    } else {
-                        cell.innerHTML = `${subject} (${group})`;
-                        cell.style.backgroundColor = color;
-                        cell.style.color = '#fff'; // Texto blanco para mejor visibilidad
-                    }
-                }
-            });
-
-            return conflicts;
-        }
-
-        function generateConflictMessage(conflicts) {
-            let message = "¡Advertencia! Se han detectado los siguientes solapamientos en el horario:<br>";
-            conflicts.forEach(conflict => {
-                message += `Día: ${conflict.day}, Hora: ${conflict.hour} - ${conflict.subject1} y ${conflict.subject2}<br>`;
-            });
-            return message;
-        }
-    </script>
-</body>
+			function generateConflictMessage(conflicts) {
+				let message =
+					"¡Advertencia! Se han detectado los siguientes solapamientos en el horario:<br>";
+				conflicts.forEach((conflict) => {
+					message += `Día: ${conflict.day}, Hora: ${conflict.hour} - ${conflict.subject1} y ${conflict.subject2}<br>`;
+				});
+				return message;
+			}
+		</script>
+	</body>
 </html>
