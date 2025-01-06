@@ -26,3 +26,4 @@ SDS POR;Grupo 2;Martes 13:00-15:00;#CA001A
 TAES TEO;Grupo 1;Miércoles 15:00-17:00;#214914
 TAES POR;Grupo 1;Miércoles 17:00-19:00;#214914
 TAES POR;Grupo 2;Miércoles 19:00-21:00;#214914
+TAES POR;Grupo 3;Jueves 17:00-19:00;#214914
