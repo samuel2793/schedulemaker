@@ -71,6 +71,10 @@
       <input type="checkbox" id="penalizeAfter20" value="true" />
       <label for="penalizeAfter20">Penalizar clases después de las 20:00</label
       ><br />
+      <input type="checkbox" id="prioritizeFewestDays" value="true" />
+      <label for="prioritizeFewestDays"
+        >Priorizar menor número de días ocupados</label
+      ><br />
       <button onclick="generateBestSchedule()">Generar Mejor Horario</button>
     </div>
 
@@ -232,6 +236,8 @@
           document.getElementById("penalizeBefore10").checked;
         const penalizeAfter20 =
           document.getElementById("penalizeAfter20").checked;
+        const prioritizeFewestDays =
+          document.getElementById("prioritizeFewestDays").checked;
 
         allCombinations.forEach((combination) => {
           const score = evaluateSchedule(
@@ -240,7 +246,8 @@
             penalizeFriday,
             penalizeGaps,
             penalizeBefore10,
-            penalizeAfter20
+            penalizeAfter20,
+            prioritizeFewestDays
           );
           if (score < bestScore) {
             bestScore = score;
@@ -285,7 +292,8 @@
         penalizeFriday,
         penalizeGaps,
         penalizeBefore10,
-        penalizeAfter20
+        penalizeAfter20,
+        prioritizeFewestDays = false
       ) {
         const timeSlots = {};
         let score = 0;
@@ -361,6 +369,14 @@
           });
         }
 
+        // Penalización por días ocupados si está activado
+        if (prioritizeFewestDays) {
+          let daysUsed = 0;
+          Object.keys(daySchedules).forEach((day) => {
+            if (daySchedules[day].length > 0) daysUsed++;
+          });
+          score += daysUsed * 30; // Penaliza cada día ocupado, ajusta el valor según preferencia
+        }
         return score;
       }
 
