@@ -1,0 +1,5 @@
+SGS POR;Grupo 1;Viernes 16:00-18:00;#7B52A9
+PI POR;Grupo 1;Martes 16:00-18:00;#078519
+SSO POR;Grupo 1;Miércoles 16:00-18:00;#3D8D4A
+SC POR;Grupo 1;Martes 18:00-20:00;#442D96
+SAB POR;Grupo 1;Viernes 18:00-20:00;#A73A85

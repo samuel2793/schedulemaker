@@ -1,0 +1,4 @@
+DAS POR;Grupo 1;Lunes 17:00-19:00;#7B52A9
+HEC POR;Grupo 1;Jueves 15:30-17:30;#078519
+AF POR;Grupo 1;Jueves 17:30-19:30;#3D8D4A
+
