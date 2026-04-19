@@ -419,27 +419,40 @@
         bestCombination.forEach(({ subject, group, schedule, color }) => {
           const [day, time] = schedule.split(" ");
           const [startTime, endTime] = time.split("-");
-          const startRow = hours.findIndex((h) => h.startsWith(startTime));
-          const endRow = hours.findIndex((h) => h.startsWith(endTime));
-          const dayIndex = days.indexOf(day) + 1;
+function timeToMinutes(t) {
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + m;
+}
 
-          for (let i = startRow; i < endRow; i++) {
-            const row = tableBody.children[i];
-            const cell = row.children[dayIndex];
-            if (cell.innerHTML) {
-              conflicts.push({
-                day,
-                hour: hours[i],
-                subject1: cell.innerHTML,
-                subject2: `${subject} (${group})`,
-              });
-              cell.classList.add("conflict");
-            } else {
-              cell.innerHTML = `${subject} (${group})`;
-              cell.style.backgroundColor = color;
-              cell.style.color = "#fff"; // Texto blanco para mejor visibilidad
-            }
-          }
+const startMinutes = timeToMinutes(startTime);
+const endMinutes = timeToMinutes(endTime);
+const dayIndex = days.indexOf(day) + 1;
+
+hours.forEach((hour, i) => {
+  const [slotStart, slotEnd] = hour.split("-");
+  const slotStartMin = timeToMinutes(slotStart);
+  const slotEndMin = timeToMinutes(slotEnd);
+
+  // Comprobar si hay solapamiento entre el bloque y la clase
+  if (startMinutes < slotEndMin && endMinutes > slotStartMin) {
+    const row = tableBody.children[i];
+    const cell = row.children[dayIndex];
+
+    if (cell.innerHTML) {
+      conflicts.push({
+        day,
+        hour: hours[i],
+        subject1: cell.innerHTML,
+        subject2: `${subject} (${group})`,
+      });
+      cell.classList.add("conflict");
+    } else {
+      cell.innerHTML = `${subject} (${group})`;
+      cell.style.backgroundColor = color;
+      cell.style.color = "#fff";
+    }
+  }
+});
         });
 
         return conflicts;
